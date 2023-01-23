@@ -46,7 +46,7 @@
     "triggers": {},
     "hostedUI": false,
     "userPoolGroupList": [
-      "GpUSerPool"
+      "Admin"
     ],
     "serviceName": "Cognito",
     "usernameCaseSensitive": false,

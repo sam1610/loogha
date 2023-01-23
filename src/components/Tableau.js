@@ -1,7 +1,7 @@
 import {AgGridReact} from 'ag-grid-react';
 import { useEffect, useState} from 'react';
 import { listQuests } from '../graphql/queries';
-import { API } from 'aws-amplify';
+import { API , Storage} from 'aws-amplify';
 import "ag-grid-enterprise"
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
@@ -14,10 +14,21 @@ export function Tableau({etat}) {
     height:20
 }
 
-const AudioCell = params =>
-<audio controls preload='none' style={myStyle}>
-<source src={params.value} type="audio/mpeg" />
-</audio>
+const AudioCell =   params=>  {
+  // const audi0= Storage.get("audio%Samir.amri@gmail.com%1673871262858" ,{level:"public"}) 
+  console.log(params); 
+return(<audio controls preload='none' style={myStyle}>
+    <source src={params.value} type="audio/mpeg" />
+    </audio>)}
+
+ 
+  // return(
+  //   <audio controls preload='none' style={myStyle}>
+  //   <source src={audi0} type="audio/mpeg" />
+  //   </audio>
+  // )
+
+
 
 var myIcons={
   sortAcending:()=>{

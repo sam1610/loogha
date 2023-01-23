@@ -1,7 +1,7 @@
 export type AmplifyDependentResourcesAttributes = {
     "auth": {
         "userPoolGroups": {
-            "GpUSerPoolGroupRole": "string"
+            "AdminGroupRole": "string"
         },
         "looghaProject": {
             "IdentityPoolId": "string",

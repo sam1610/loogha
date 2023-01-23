@@ -1,12 +1,16 @@
+
 import { API, Predictions, Storage } from "aws-amplify"
 import { useState } from "react";
 import { createQuest } from "../graphql/mutations";
 import { Tableau } from "./Tableau";
+import { Bt } from "./Icon";
+
  
  
+
+
+function QuestForm({currentUser, userStatus}) {
  
-function QuestForm({currentUser}) {
-    const [user, setUser] = useState(currentUser);
     
     // const [user, setUser] = useState(null)
     // useEffect(() => {
@@ -19,6 +23,7 @@ function QuestForm({currentUser}) {
    const [quest, setQuest] = useState(initialize)
    const [subm, setSubm] = useState(false)
    const voiceID={ Fr:"Mathieu", En:"Emma", Es:"Lucia", Arb:"Zeina"}
+  
    
    const handleChange= (key)=>{
        return (e)=>{ setQuest({...quest, [key]:e.target.value})}
@@ -50,27 +55,35 @@ function QuestForm({currentUser}) {
           },
           voiceId:voiceID[quest.lang]
         }
-       }).then( result=> {
-        console.log(result.speech.url)
+       }).then( (result)=> {
+        // console.log(result.speech.url)
       fetch(result.speech.url).then(r=>r.blob()).then(
       async blob => {
-        const flput= await Storage.put(`audio%${currentUser.email}%${Date.now()}`, blob, {
+        await Storage.put(`audio%${currentUser.email}%${Date.now()}`, blob,
+         {
+          // acl: 'public-read',
           contentType:"audio/mp3",
           level:"public"
-        })
-       
-        const audi0= await  Storage.get(
- "audio%Samir.amri@gmail.com%1673867623609",{level:'public', expires:180})
-     
-         console.log("Audio :", audi0);
+        }).then( res=> Storage.get(res.key, {level:"public", expires:604800})).then( async (res)=> {
+          // console.log(res);
+          await  API.graphql({
+            query:createQuest, 
+            variables:{ 
+              input:{...quest, audioUrlOrg:res}
+            }
+          })
+          setSubm(!subm)
+          setQuest(initialize)
+ 
+            // await Storage.get(result,{level:'public' , expires:60}).then( async (result)=> {
+
+            //       })
+                }
+          )
+
+        //  console.log("Audio :", audi0);
         // 
-         API.graphql({
-          query:createQuest, 
-          variables:{ 
-            input:{...quest, audioUrlOrg:audi0}
-          }
-        })
-        setSubm(!subm)
+        
         // 
       })
       })
@@ -81,28 +94,21 @@ function QuestForm({currentUser}) {
       // .catch( err=> console.log(err))
    
 
-// try {
-//   await Predictions.convert({
-//       textToSpeech:{ 
-//         source:{
-//           text:quest.textOrg,
-//           language:quest.lang
-//         },
-//         voiceId:voiceID[quest.lang]
-//       }
-//      }).then( result=> console.log(result.speech.url))
-// } catch (err) {
-//   console.log(err);
-// }
+
      
     //  .catch( err=> console.log(err))
-
+ 
+ 
 }
    return (
  <div className="App">
+  <Bt lang={quest.lang}/>
+  
+  { userStatus==="Professor" && 
  <form  onSubmit={handleSubmit}>
            <h2> Add new Question</h2>
-           <input type="email" value={currentUser.email} onChange={handleChange("email")} />
+           {/* <input type="email" value={currentUser.email} onChange={handleChange("email")} /> */}
+
            <select name="LangId" onChange={handleChange("lang")} value={quest.lang} >
             <option value="None"  > Language....</option>
             <option value="Arb"> عربي</option>
@@ -110,10 +116,11 @@ function QuestForm({currentUser}) {
             <option value="Fr"> Fr</option>
             <option value="Es"> Es</option>
            </select>
-           <input type="text" placeholder="Origin Text" val={quest.textOrg} onChange={handleChange("textOrg")} />
+           <input type="text" placeholder="Origin Text"  value={quest.textOrg} onChange={handleChange("textOrg")} />
            <input type="date" placeholder="Scheduled On" value={quest.schedOn} onChange={handleChange("schedOn")} />
            <button type="submit"  > Add New Question</button>
-       </form>
+       </form> 
+        }
        <Tableau  etat={subm}/>
      </div>
    );
